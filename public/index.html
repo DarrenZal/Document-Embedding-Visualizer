@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Embedding Visualizer</title>
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        #plotDiv { width: 90vw; height: 80vh; margin-top: 20px; border: 1px solid #ccc; }
+        #message { margin-top: 10px; font-style: italic; }
+        button { margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Document Embedding Visualizer</h1>
+    <p>Upload one or more PDF, Markdown (.md), or Text (.txt) files to visualize their relationships based on content embeddings.</p>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="documents">Select files:</label>
+        <input type="file" id="documents" name="documents" accept=".pdf,.md,.txt" multiple required>
+        <button type="submit">Visualize</button>
+    </form>
+
+    <div id="message"></div>
+    <div id="plotDiv"></div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const messageDiv = document.getElementById('message');
+        const plotDiv = document.getElementById('plotDiv');
+        const fileInput = document.getElementById('documents');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            messageDiv.textContent = 'Uploading and processing files... Please wait.';
+            Plotly.purge(plotDiv); // Clear previous plot
+
+            const formData = new FormData();
+            // Append all selected files
+            for (const file of fileInput.files) {
+                formData.append('documents', file);
+            }
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                    // 'Content-Type': 'multipart/form-data' is set automatically by browser for FormData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.visualizationData) {
+                    messageDiv.textContent = 'Processing complete. Rendering visualization...';
+                    // Plotly.react ensures efficient updates if the plot already exists
+                    Plotly.react(plotDiv, result.visualizationData.data, result.visualizationData.layout, result.visualizationData.config);
+                    messageDiv.textContent = 'Visualization rendered.';
+                } else {
+                    throw new Error('Server did not return visualization data.');
+                }
+
+            } catch (error) {
+                console.error('Error during upload or processing:', error);
+                messageDiv.textContent = `Error: ${error.message}`;
+                Plotly.purge(plotDiv); // Clear plot area on error
+            }
+        });
+    </script>
+</body>
+</html>
