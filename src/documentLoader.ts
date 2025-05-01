@@ -130,7 +130,7 @@ async function readFileContent(filepath: string, filetype: Document['filetype'])
       console.log(`[readFileContent] Sending PDF to Unstructured API...`);
       try {
         const response = await axios.post(
-          'https://api.unstructured.io/general/v0/general',
+          'https://api.unstructuredapp.io/general/v0/general', // Corrected URL
           formData,
           {
             headers: {
