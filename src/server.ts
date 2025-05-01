@@ -7,6 +7,7 @@ import { loadUploadedDocuments } from './documentLoader.js';
 import { generateEmbeddings } from './embeddingGenerator.js';
 import { reduceDimensions, UMAPOptions } from './dimensionReducer.js'; // Import UMAPOptions type
 import { generatePlotlyData } from './visualizer.js';
+import { pathToFileURL } from 'url'; // Import for ESM main check
 
 // Determine upload directory based on environment
 const IS_VERCEL = process.env.VERCEL === '1';
@@ -120,9 +121,11 @@ app.post('/api/upload', upload.array('documents'), async (req: Request, res: Res
 export { app };
 export default app; // Default export might be useful too
 
-// Start the server only if this file is run directly (e.g., `node dist/server.js` or `ts-node src/server.ts`)
+// Start the server only if this file is run directly (e.g., `node dist/server.js` or using ts-node/esm loader)
 // This allows Vercel to import the 'app' object while still enabling local execution.
-if (require.main === module) {
+// Use ESM check: import.meta.url === pathToFileURL(process.argv[1]).href
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const port = process.env.PORT || 3000;
   app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
