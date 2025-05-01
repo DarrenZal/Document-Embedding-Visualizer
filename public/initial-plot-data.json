@@ -1,0 +1,62 @@
+{
+  "data": [
+    {
+      "x": [
+        6.552100414920233,
+        4.08095557841682,
+        -0.011793044902930205
+      ],
+      "y": [
+        -1.852282376017417,
+        7.195099303146762,
+        -5.7715933634204
+      ],
+      "z": [
+        -9.310737370785432,
+        -9.945110300633417,
+        -8.201538633878513
+      ],
+      "mode": "markers",
+      "type": "scatter3d",
+      "text": [
+        "Place, Localism, Relationality, Proximity & Systems Change…..pdf",
+        "Knowledge_graph.pdf",
+        "2305.00813v1.pdf"
+      ],
+      "customdata": [
+        "/Users/darrenzal/ven/pre-pop/Place, Localism, Relationality, Proximity & Systems Change…..pdf",
+        "/Users/darrenzal/ven/pre-pop/Knowledge_graph.pdf",
+        "/Users/darrenzal/ven/pre-pop/2305.00813v1.pdf"
+      ],
+      "hoverinfo": "none",
+      "hovertemplate": "<b>%{text}</b><br><a href=\"/%{customdata}\" target=\"_blank\" style=\"color: white;\">View File</a><extra></extra>",
+      "marker": {
+        "size": 5
+      }
+    }
+  ],
+  "layout": {
+    "title": "Document Embedding Visualizer",
+    "margin": {
+      "l": 0,
+      "r": 0,
+      "b": 0,
+      "t": 40
+    },
+    "scene": {
+      "xaxis": {
+        "title": "UMAP Dim 1"
+      },
+      "yaxis": {
+        "title": "UMAP Dim 2"
+      },
+      "zaxis": {
+        "title": "UMAP Dim 3"
+      }
+    },
+    "hovermode": "closest"
+  },
+  "config": {
+    "staticPlot": false
+  }
+}

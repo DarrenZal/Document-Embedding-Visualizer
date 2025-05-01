@@ -9,6 +9,7 @@
     "start": "node dist/server.js",
     "dev": "node --loader ts-node/esm --watch src/server.ts",
     "test": "jest",
+    "generate-initial": "node --loader ts-node/esm scripts/generate-initial-data.ts",
     "vercel-build": "npm run build"
   },
   "keywords": [

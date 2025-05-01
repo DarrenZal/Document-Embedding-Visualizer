@@ -28,11 +28,36 @@
     <script>
         const form = document.getElementById('uploadForm');
         const messageDiv = document.getElementById('message');
-        const plotDiv = document.getElementById('plotDiv');
-        const fileInput = document.getElementById('documents');
+         const plotDiv = document.getElementById('plotDiv');
+         const fileInput = document.getElementById('documents');
 
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent default form submission
+         // --- Load Initial Data on Page Load ---
+         document.addEventListener('DOMContentLoaded', async () => {
+            messageDiv.textContent = 'Loading initial visualization...';
+            try {
+                const response = await fetch('/initial-plot-data.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const initialData = await response.json();
+
+                if (initialData && initialData.data && initialData.layout) {
+                    Plotly.newPlot(plotDiv, initialData.data, initialData.layout, initialData.config || {});
+                    messageDiv.textContent = 'Initial visualization loaded. Upload your own documents to generate a new plot.';
+                } else {
+                     throw new Error('Initial data is missing or invalid.');
+                }
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+                messageDiv.textContent = `Could not load initial visualization: ${error.message}. Please try uploading documents.`;
+                Plotly.purge(plotDiv); // Ensure plot is empty if initial load fails
+            }
+         });
+         // --- End Initial Data Load ---
+
+
+         form.addEventListener('submit', async (event) => {
+             event.preventDefault(); // Prevent default form submission
 
             messageDiv.textContent = 'Uploading and processing files... Please wait.';
             Plotly.purge(plotDiv); // Clear previous plot
