@@ -1,4 +1,4 @@
-import { loadDocuments } from '../documentLoader'; // This will initially fail as the file doesn't exist
+import { loadDocuments, Document } from '../documentLoader.js'; // Add .js extension and Document type
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -39,7 +39,7 @@ describe('documentLoader', () => {
   it('should load .txt, .md, and .pdf files', async () => {
     const documents = await loadDocuments(TEST_DIR);
     expect(documents.length).toBe(3); // txt, md, pdf
-    const filenames = documents.map(doc => path.basename(doc.filepath));
+    const filenames = documents.map((doc: Document) => path.basename(doc.filepath)); // Add type
     expect(filenames).toContain('doc1.txt');
     expect(filenames).toContain('doc2.md');
     expect(filenames).toContain('doc3.pdf');
@@ -47,19 +47,19 @@ describe('documentLoader', () => {
 
   it('should ignore unsupported file types', async () => {
     const documents = await loadDocuments(TEST_DIR);
-    const filenames = documents.map(doc => path.basename(doc.filepath));
+    const filenames = documents.map((doc: Document) => path.basename(doc.filepath)); // Add type
     expect(filenames).not.toContain('other.log');
   });
 
   it('should extract correct content for .txt files', async () => {
     const documents = await loadDocuments(TEST_DIR);
-    const txtDoc = documents.find(doc => doc.filepath.endsWith('.txt'));
+    const txtDoc = documents.find((doc: Document) => doc.filepath.endsWith('.txt')); // Add type
     expect(txtDoc?.content).toBe('Plain text content.');
   });
 
   it('should extract correct content for .md files using marked', async () => {
     const documents = await loadDocuments(TEST_DIR);
-    const mdDoc = documents.find(doc => doc.filepath.endsWith('.md'));
+    const mdDoc = documents.find((doc: Document) => doc.filepath.endsWith('.md')); // Add type
     // Note: We check against the mocked marked output
     expect(mdDoc?.content).toBe('Mock Markdown content parsed');
     expect(require('marked').marked.parse).toHaveBeenCalledWith('# Markdown Header');
@@ -67,7 +67,7 @@ describe('documentLoader', () => {
 
   it('should extract correct content for .pdf files using pdf-parse', async () => {
     const documents = await loadDocuments(TEST_DIR);
-    const pdfDoc = documents.find(doc => doc.filepath.endsWith('.pdf'));
+    const pdfDoc = documents.find((doc: Document) => doc.filepath.endsWith('.pdf')); // Add type
     expect(pdfDoc?.content).toBe('Mock PDF content');
     // Check the mocked default function specifically
     expect(require('pdf-parse').default).toHaveBeenCalled();

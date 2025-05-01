@@ -1,8 +1,8 @@
 import request from 'supertest';
-import { app } from '../server'; // Assuming server exports 'app'
+import { app } from '../server.js'; // Add .js extension
 import { jest } from '@jest/globals'; // Import Jest object for mocking
 
-import { Document } from '../documentLoader'; // Import Document type for mocks
+import { Document } from '../documentLoader.js'; // Add .js extension
 
 // Mock the embeddingGenerator module
 jest.mock('../embeddingGenerator', () => ({
@@ -16,7 +16,7 @@ jest.mock('../embeddingGenerator', () => ({
 
 // Mock the dimensionReducer module as well, as it might depend on specific embedding formats
 // or could also cause issues if it has complex dependencies.
-import { UMAPOptions } from '../dimensionReducer'; // Import UMAPOptions type
+import { UMAPOptions } from '../dimensionReducer.js'; // Add .js extension
 
 // Let's assume it returns 3D points based on the number of embeddings.
 jest.mock('../dimensionReducer', () => ({

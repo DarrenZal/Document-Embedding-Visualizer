@@ -1,8 +1,9 @@
 import * as path from 'path';
-import { loadDocuments } from './documentLoader';
-import { generateEmbeddings } from './embeddingGenerator';
-import { reduceDimensions } from './dimensionReducer';
-import { create3DScatterPlot } from './visualizer';
+// Add .js extension for ESM imports
+import { loadDocuments } from './documentLoader.js';
+import { generateEmbeddings } from './embeddingGenerator.js';
+import { reduceDimensions } from './dimensionReducer.js';
+import { create3DScatterPlot } from './visualizer.js';
 
 // --- Configuration ---
 const DEFAULT_INPUT_DIR = './input_docs'; // Default directory to look for documents
@@ -32,7 +33,7 @@ async function runPipeline(inputDir: string, outputFile: string) {
 
         // 3. Reduce Dimensions
         console.log("\nStep 3: Reducing dimensions using UMAP...");
-        const umapOptions: import('./dimensionReducer').UMAPOptions = {}; // Declare umapOptions here
+        const umapOptions: import('./dimensionReducer.js').UMAPOptions = {}; // Add .js extension
         // Ensure we have enough embeddings for UMAP default settings (nNeighbors=15)
         if (embeddings.length <= 15) {
              console.warn(`Warning: Only ${embeddings.length} data points found. UMAP may not produce meaningful results with default settings (requires > 15 points). Consider adding more documents or adjusting UMAP parameters.`);

@@ -1,5 +1,5 @@
-// Keep Document import, remove create3DScatterPlot import
-import { Document } from '../documentLoader';
+// Keep Document import + .js extension, remove create3DScatterPlot import
+import { Document } from '../documentLoader.js';
 // import * as fs from 'fs/promises'; // Remove static fs import
 import * as path from 'path';
 
@@ -7,8 +7,8 @@ import * as path from 'path';
 const mockWriteFile = jest.fn().mockResolvedValue(undefined);
 const mockMkdir = jest.fn().mockResolvedValue(undefined);
 
-// Declare the variable for the function under test
-let create3DScatterPlot: typeof import('../visualizer').create3DScatterPlot;
+// Declare the variable for the function under test + .js extension
+let create3DScatterPlot: typeof import('../visualizer.js').create3DScatterPlot;
 
 
 describe('visualizer', () => {
@@ -31,8 +31,8 @@ describe('visualizer', () => {
 
         // Crucial to clear cache and re-import with mocks applied
         jest.resetModules();
-        // Dynamically import the module under test AFTER mocks are set
-        create3DScatterPlot = (await import('../visualizer')).create3DScatterPlot;
+        // Dynamically import the module under test AFTER mocks are set + .js extension
+        create3DScatterPlot = (await import('../visualizer.js')).create3DScatterPlot;
     });
 
      afterAll(() => {

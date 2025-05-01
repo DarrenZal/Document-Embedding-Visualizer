@@ -1,5 +1,5 @@
-// Keep Document import at top
-import { Document } from '../documentLoader';
+// Keep Document import at top + .js extension
+import { Document } from '../documentLoader.js';
 
 // Define the mock pipeline function at the top level
 const mockPipeline = jest.fn().mockImplementation(async (text: string | string[]) => {
@@ -15,8 +15,8 @@ const mockPipeline = jest.fn().mockImplementation(async (text: string | string[]
   }
 });
 
-// Declare the variable for the function under test
-let generateEmbeddings: typeof import('../embeddingGenerator').generateEmbeddings;
+// Declare the variable for the function under test + .js extension
+let generateEmbeddings: typeof import('../embeddingGenerator.js').generateEmbeddings;
 
 describe('embeddingGenerator', () => {
   // Apply the mock before tests run, after initial module load
@@ -39,7 +39,7 @@ describe('embeddingGenerator', () => {
     // or ensure the module is re-imported cleanly.
     // Re-importing ensures we get the version with the mock applied.
     jest.resetModules(); // Crucial to clear cache and re-import with mock
-    generateEmbeddings = (await import('../embeddingGenerator')).generateEmbeddings;
+    generateEmbeddings = (await import('../embeddingGenerator.js')).generateEmbeddings; // Add .js extension
     // Clear the pipeline mock specifically if needed after re-import
      const transformers = require('@xenova/transformers');
      if (transformers.pipeline.mockClear) {
@@ -83,7 +83,7 @@ describe('embeddingGenerator', () => {
 
   it('should return embeddings as Float32Array', async () => {
     const embeddings = await generateEmbeddings(sampleDocuments);
-    embeddings.forEach(emb => {
+    embeddings.forEach((emb: Float32Array) => { // Add type annotation
       expect(emb).toBeInstanceOf(Float32Array);
       expect(emb.length).toBe(384); // Check dimension matches mock
     });

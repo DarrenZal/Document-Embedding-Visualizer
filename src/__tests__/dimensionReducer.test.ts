@@ -1,4 +1,4 @@
-import { reduceDimensions } from '../dimensionReducer'; // Will fail initially
+import { reduceDimensions } from '../dimensionReducer.js'; // Add .js extension
 
 // Mock the umap-js library
 const mockFit = jest.fn(); // Mock for 'fit' method (if used)
