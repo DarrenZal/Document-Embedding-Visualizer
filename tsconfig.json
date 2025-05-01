@@ -3,7 +3,7 @@
     "target": "ES2020", // Target modern JavaScript features
     "module": "CommonJS", // Use CommonJS modules for Node.js compatibility
     "outDir": "./dist", // Output directory for compiled JavaScript
-    "rootDir": "./src", // Root directory of source files
+    // "rootDir": "./src", // Remove rootDir to allow compiling multiple top-level dirs (src, api)
     "strict": true, // Enable all strict type-checking options
     "esModuleInterop": true, // Allows default imports from CommonJS modules
     "skipLibCheck": true, // Skip type checking of declaration files
@@ -11,6 +11,6 @@
     "resolveJsonModule": true, // Allow importing JSON files
     "moduleResolution": "node" // Use Node.js module resolution strategy
   },
-  "include": ["src/**/*"], // Include all files in the src directory
-  "exclude": ["node_modules", "**/*.spec.ts"] // Exclude node_modules and test files
+  "include": ["src/**/*", "api/**/*"], // Include both src and api directories
+  "exclude": ["node_modules", "**/*.spec.ts", "dist"] // Exclude node_modules, tests, and output dir
 }
