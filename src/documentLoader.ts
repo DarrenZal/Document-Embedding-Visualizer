@@ -137,11 +137,11 @@ async function readFileContent(filepath: string, filetype: Document['filetype'])
               ...formData.getHeaders(), // Important for multipart/form-data
               'accept': 'application/json',
               'unstructured-api-key': apiKey,
-            },
-            // Set a reasonable timeout
-            timeout: 180000 // 3 minutes, adjust as needed
-          }
-        );
+             },
+             // Set timeout slightly less than common Vercel limits (e.g., 60s)
+             timeout: 55000 // 55 seconds
+           }
+         );
 
         console.log(`[readFileContent] Unstructured API response status: ${response.status}`);
         // Assuming the response is an array of elements with a 'text' property
