@@ -47,17 +47,22 @@ export async function loadDocuments(directoryPath: string): Promise<Document[]> 
 
 // Function to load documents from multer upload data
 export async function loadUploadedDocuments(files: Express.Multer.File[]): Promise<Document[]> {
+    console.log(`[loadUploadedDocuments] Starting processing for ${files.length} files.`); // Added log
     const documents: Document[] = [];
 
     for (const file of files) {
+        console.log(`[loadUploadedDocuments] Processing file: ${file.originalname}, Path: ${file.path}, Size: ${file.size}`); // Added log
         // file.path now points to the permanent location in input_docs
         // file.originalname is the original name of the uploaded file
         const filetype = getFileType(file.originalname); // Still use originalname for type detection
+        console.log(`[loadUploadedDocuments] Detected filetype: ${filetype}`); // Added log
 
         if (filetype !== 'unknown') {
             try {
+                console.log(`[loadUploadedDocuments] Reading content for ${file.originalname}...`); // Added log
                 // Read content from the permanent path provided by multer's diskStorage
                 const content = await readFileContent(file.path, filetype);
+                console.log(`[loadUploadedDocuments] Successfully read content for ${file.originalname}. Length: ${content.length}`); // Added log
 
                 // Construct the server-accessible path relative to the project root
                 // Use path.relative to get the path from the project root (__dirname is dist/src, so go up two levels)
@@ -94,31 +99,43 @@ function getFileType(filepath: string): Document['filetype'] {
 
 // Helper function to read content based on file type
 async function readFileContent(filepath: string, filetype: Document['filetype']): Promise<string> {
+  console.log(`[readFileContent] Reading file: ${filepath}, Type: ${filetype}`); // Added log
   try {
     if (filetype === 'txt') {
+      console.log(`[readFileContent] Reading as text: ${filepath}`); // Added log
       return await fs.readFile(filepath, 'utf-8');
     } else if (filetype === 'md') {
+      console.log(`[readFileContent] Reading as markdown: ${filepath}`); // Added log
       const rawContent = await fs.readFile(filepath, 'utf-8');
       // Use marked.parse for async parsing
-      // Use marked.parse for async parsing
-      return await marked.parse(rawContent);
+      const parsedContent = await marked.parse(rawContent);
+      console.log(`[readFileContent] Parsed markdown. Length: ${parsedContent.length}`); // Added log
+      return parsedContent;
     } else if (filetype === 'pdf') {
+      console.log(`[readFileContent] Reading as PDF: ${filepath}`); // Added log
       const dataBuffer = await fs.readFile(filepath);
+      console.log(`[readFileContent] PDF read into buffer. Length: ${dataBuffer.length}`); // Added log
       // Convert Node.js Buffer to Uint8Array for pdfjs-dist
       const uint8Array = new Uint8Array(dataBuffer);
+      console.log(`[readFileContent] Converted PDF buffer to Uint8Array. Length: ${uint8Array.length}`); // Added log
       // Use pdfjs-dist to load the document
+      console.log(`[readFileContent] Calling pdfjsLib.getDocument...`); // Added log
       const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
       const pdfDoc = await loadingTask.promise;
+      console.log(`[readFileContent] PDF document loaded. Pages: ${pdfDoc.numPages}`); // Added log
       let fullText = '';
       for (let i = 1; i <= pdfDoc.numPages; i++) {
+        console.log(`[readFileContent] Processing PDF page ${i}...`); // Added log
         const page = await pdfDoc.getPage(i);
         const textContent = await page.getTextContent();
+        console.log(`[readFileContent] Extracted text content from page ${i}. Items: ${textContent.items.length}`); // Added log
         // Concatenate text items, adding spaces or newlines as needed
         fullText += textContent.items.map((item: any) => item.str).join(' ') + '\n';
       }
+      console.log(`[readFileContent] Finished processing PDF. Total text length: ${fullText.length}`); // Added log
       return fullText.trim();
     } else {
-      console.warn(`Attempted to read unsupported file type: ${filepath}`);
+      console.warn(`[readFileContent] Attempted to read unsupported file type: ${filepath}`);
       return ''; // Or throw an error
     }
   } catch (error) {
