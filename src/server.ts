@@ -2,10 +2,11 @@ import express, { Express, Request, Response } from 'express';
 import path from 'path';
 import multer from 'multer';
 import fs from 'fs/promises'; // Needed for directory creation and cleanup
-import { loadUploadedDocuments } from './documentLoader';
-import { generateEmbeddings } from './embeddingGenerator';
-import { reduceDimensions, UMAPOptions } from './dimensionReducer'; // Import UMAPOptions type
-import { generatePlotlyData } from './visualizer';
+// Add .js extension for ESM imports
+import { loadUploadedDocuments } from './documentLoader.js';
+import { generateEmbeddings } from './embeddingGenerator.js';
+import { reduceDimensions, UMAPOptions } from './dimensionReducer.js'; // Import UMAPOptions type
+import { generatePlotlyData } from './visualizer.js';
 
 // Determine upload directory based on environment
 const IS_VERCEL = process.env.VERCEL === '1';
@@ -115,10 +116,9 @@ app.post('/api/upload', upload.array('documents'), async (req: Request, res: Res
 
 
 // Export the app for testing
+// Use ESM export style
 export { app };
-
-// Export the app for Vercel
-module.exports = app;
+export default app; // Default export might be useful too
 
 // Start the server only if this file is run directly (e.g., `node dist/server.js` or `ts-node src/server.ts`)
 // This allows Vercel to import the 'app' object while still enabling local execution.

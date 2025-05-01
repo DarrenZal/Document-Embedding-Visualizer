@@ -1,6 +1,6 @@
 // Remove static imports for transformers
 // import { pipeline, env, Pipeline } from '@xenova/transformers';
-import { Document } from './documentLoader'; // Import the Document type
+import { Document } from './documentLoader.js'; // Import the Document type + .js extension
 
 // Define the expected function signature for the feature extraction pipeline
 // Note: We might not need the Pipeline type directly anymore if only using dynamic import

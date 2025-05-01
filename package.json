@@ -1,6 +1,7 @@
 {
   "name": "document-embedding-visualizer",
   "version": "1.0.0",
+  "type": "module",
   "description": "Generates and visualizes document embeddings in a 3D space.",
   "main": "dist/main.js",
   "scripts": {

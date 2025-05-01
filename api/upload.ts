@@ -4,11 +4,11 @@ import multer from 'multer';
 import fs from 'fs/promises';
 import util from 'util'; // To promisify multer
 
-// Assuming these are correctly exported from their respective files relative to the compiled location (dist/src/*)
-import { loadUploadedDocuments } from '../src/documentLoader';
-import { generateEmbeddings } from '../src/embeddingGenerator';
-import { reduceDimensions, UMAPOptions } from '../src/dimensionReducer';
-import { generatePlotlyData } from '../src/visualizer';
+// Add .js extension for ESM imports
+import { loadUploadedDocuments } from '../src/documentLoader.js';
+import { generateEmbeddings } from '../src/embeddingGenerator.js';
+import { reduceDimensions, UMAPOptions } from '../src/dimensionReducer.js';
+import { generatePlotlyData } from '../src/visualizer.js';
 
 // Define Vercel's temporary directory for uploads
 const UPLOAD_DIR = path.join('/tmp', 'input_docs_api'); // Use a distinct temp dir name
