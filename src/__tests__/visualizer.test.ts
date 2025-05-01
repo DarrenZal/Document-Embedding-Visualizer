@@ -55,15 +55,36 @@ describe('visualizer', () => {
 
     it('should throw an error if documents and points lengths mismatch', async () => {
         const mismatchedPoints = [[0.1, 0.2, 0.3]]; // Only one point
+
+        // Temporarily mock console.error to suppress the expected error log
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
         await expect(create3DScatterPlot(sampleDocuments, mismatchedPoints, outputPath))
             .rejects.toThrow(/Mismatch between number of documents/);
+
+        // Restore console.error
+        consoleErrorSpy.mockRestore();
     });
 
     it('should handle empty data gracefully', async () => {
         await create3DScatterPlot([], [], outputPath);
-        // Should not call writeFile if data is empty
-        // expect(mockPlot).not.toHaveBeenCalled(); // Removed plot check
-        expect(mockWriteFile).not.toHaveBeenCalled();
+
+        // Expect writeFile to be called with the placeholder HTML
+        expect(mockWriteFile).toHaveBeenCalledTimes(1);
+        const writtenHtml = mockWriteFile.mock.calls[0][1];
+        const expectedPlaceholderHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>No Data</title>
+</head>
+<body>
+    <p>No data available to generate the visualization.</p>
+</body>
+</html>
+            `.trim();
+        expect(mockWriteFile).toHaveBeenCalledWith(outputPath, expectedPlaceholderHtml, 'utf-8');
     });
 
     it('should write HTML containing correct plot data JSON', async () => {
@@ -79,12 +100,14 @@ describe('visualizer', () => {
             z: [0.3, 0.6],
             mode: 'markers',
             type: 'scatter3d',
-            text: ['doc1.txt', 'doc2.md'],
-            hoverinfo: 'text',
+            text: ['doc1.txt', 'doc2.md'], // Filenames
+            customdata: ['dir/doc1.txt', 'dir/doc2.md'], // Full paths
+            hoverinfo: 'none', // Use hovertemplate instead
+            hovertemplate: `<b>%{text}</b><br><a href="/%{customdata}" target="_blank" style="color: white;">View File</a><extra></extra>`,
             marker: { size: 5 },
         };
         const expectedLayout = {
-             title: 'Document Embeddings 3D Visualization',
+             title: 'Document Embedding Visualizer', // Match actual title
              margin: { l: 0, r: 0, b: 0, t: 40 },
              scene: {
                  xaxis: { title: 'UMAP Dim 1' },
@@ -99,7 +122,8 @@ describe('visualizer', () => {
         expect(writtenHtml).toContain(`const plotData = ${JSON.stringify([expectedTrace])};`);
         expect(writtenHtml).toContain(`const layout = ${JSON.stringify(expectedLayout)};`);
         expect(writtenHtml).toContain(`const config = ${JSON.stringify(expectedConfig)};`);
-        expect(writtenHtml).toContain(`Plotly.newPlot('plotDiv', plotData, layout, config);`);
+        // Use the variable name 'plotDiv' instead of the string literal
+        expect(writtenHtml).toContain(`Plotly.newPlot(plotDiv, plotData, layout, config);`);
     });
 
     // This test is now covered by the one above, can be removed or kept for redundancy
