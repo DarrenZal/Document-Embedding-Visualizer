@@ -3,6 +3,11 @@
     {
       "src": "/api/(.*)",
       "dest": "dist/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
-  ]
+  ],
+  "outputDirectory": "public"
 }
