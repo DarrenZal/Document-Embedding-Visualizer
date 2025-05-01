@@ -29,3 +29,8 @@ Thumbs.db
 .idea/
 *.sublime-workspace
 *.sublime-project
+
+# Input data (if not needed in repo)
+input_docs/
+
+input_docs/*.pdf
