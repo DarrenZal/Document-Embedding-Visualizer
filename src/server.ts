@@ -1,3 +1,6 @@
+// Load environment variables from .env file for local development
+import 'dotenv/config';
+
 import express, { Express, Request, Response } from 'express';
 import path from 'path';
 import multer from 'multer';

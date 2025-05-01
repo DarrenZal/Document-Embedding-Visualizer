@@ -1,10 +1,10 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { glob } from 'glob';
-// Remove pdf-parse import
-// import pdf from 'pdf-parse';
-// Import pdfjs-dist using the recommended path for ESM/Node
-import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
+import axios from 'axios'; // Import axios
+import FormData from 'form-data'; // Import form-data
+// Remove pdfjs-dist import
+// import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { marked } from 'marked'; // Use named import for marked
 
 // Define the structure for our document objects
@@ -112,28 +112,51 @@ async function readFileContent(filepath: string, filetype: Document['filetype'])
       console.log(`[readFileContent] Parsed markdown. Length: ${parsedContent.length}`); // Added log
       return parsedContent;
     } else if (filetype === 'pdf') {
-      console.log(`[readFileContent] Reading as PDF: ${filepath}`); // Added log
-      const dataBuffer = await fs.readFile(filepath);
-      console.log(`[readFileContent] PDF read into buffer. Length: ${dataBuffer.length}`); // Added log
-      // Convert Node.js Buffer to Uint8Array for pdfjs-dist
-      const uint8Array = new Uint8Array(dataBuffer);
-      console.log(`[readFileContent] Converted PDF buffer to Uint8Array. Length: ${uint8Array.length}`); // Added log
-      // Use pdfjs-dist to load the document
-      console.log(`[readFileContent] Calling pdfjsLib.getDocument...`); // Added log
-      const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
-      const pdfDoc = await loadingTask.promise;
-      console.log(`[readFileContent] PDF document loaded. Pages: ${pdfDoc.numPages}`); // Added log
-      let fullText = '';
-      for (let i = 1; i <= pdfDoc.numPages; i++) {
-        console.log(`[readFileContent] Processing PDF page ${i}...`); // Added log
-        const page = await pdfDoc.getPage(i);
-        const textContent = await page.getTextContent();
-        console.log(`[readFileContent] Extracted text content from page ${i}. Items: ${textContent.items.length}`); // Added log
-        // Concatenate text items, adding spaces or newlines as needed
-        fullText += textContent.items.map((item: any) => item.str).join(' ') + '\n';
+      console.log(`[readFileContent] Processing PDF via Unstructured API: ${filepath}`); // Updated log
+      const apiKey = process.env.UNSTRUCTURED_API_KEY;
+      if (!apiKey) {
+        console.error("[readFileContent] UNSTRUCTURED_API_KEY environment variable not set.");
+        throw new Error("UNSTRUCTURED_API_KEY environment variable not set.");
       }
-      console.log(`[readFileContent] Finished processing PDF. Total text length: ${fullText.length}`); // Added log
-      return fullText.trim();
+
+      const dataBuffer = await fs.readFile(filepath);
+      console.log(`[readFileContent] PDF read into buffer. Length: ${dataBuffer.length}`);
+
+      const formData = new FormData();
+      // Use the original filename for the API request
+      formData.append('files', dataBuffer, path.basename(filepath));
+      // Optional: Add strategy if needed, e.g., formData.append('strategy', 'hi_res');
+
+      console.log(`[readFileContent] Sending PDF to Unstructured API...`);
+      try {
+        const response = await axios.post(
+          'https://api.unstructured.io/general/v0/general',
+          formData,
+          {
+            headers: {
+              ...formData.getHeaders(), // Important for multipart/form-data
+              'accept': 'application/json',
+              'unstructured-api-key': apiKey,
+            },
+            // Set a reasonable timeout
+            timeout: 180000 // 3 minutes, adjust as needed
+          }
+        );
+
+        console.log(`[readFileContent] Unstructured API response status: ${response.status}`);
+        // Assuming the response is an array of elements with a 'text' property
+        if (Array.isArray(response.data)) {
+          const fullText = response.data.map((element: any) => element.text).join('\n\n'); // Join elements with double newline
+          console.log(`[readFileContent] Extracted text from Unstructured API. Length: ${fullText.length}`);
+          return fullText;
+        } else {
+          console.error("[readFileContent] Unexpected response format from Unstructured API:", response.data);
+          throw new Error("Unexpected response format from Unstructured API.");
+        }
+      } catch (apiError: any) {
+        console.error(`[readFileContent] Error calling Unstructured API for ${filepath}:`, apiError.response?.data || apiError.message);
+        throw new Error(`Failed to process PDF via Unstructured API: ${apiError.message}`);
+      }
     } else {
       console.warn(`[readFileContent] Attempted to read unsupported file type: ${filepath}`);
       return ''; // Or throw an error
