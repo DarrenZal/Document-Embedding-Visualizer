@@ -93,6 +93,16 @@ npm test
 ```
 *(Note: Tests may need updates to reflect the current architecture).*
 
-## Future Plans
+ ## Future Plans
 
-(Content from previous README about Phase 2 can be kept here if still relevant).
+ The next phase aims to enhance the visualization by incorporating extracted discourse graphs and their components:
+
+ 1.  **Discourse Graph Extraction:** Implement functionality to extract discourse graphs (representing elements like claims, evidence, premises, and their relationships) from the content of the processed PDFs and other documents. This might involve using LLMs or specialized NLP techniques.
+ 2.  **Component Embedding:** Generate semantic embeddings not only for the whole documents but also for the individual nodes (e.g., claims, evidence) and potentially edges (relationships) within the extracted discourse graphs.
+ 3.  **Multi-Layered Visualization:** Update the dimensionality reduction (UMAP) and Plotly visualization to represent multiple layers of information in the same 3D space:
+     *   Display points for whole documents.
+     *   Display points for discourse graph components, potentially using different markers, sizes, or colors based on component type (claim, evidence, etc.).
+     *   Visualize the structure of the discourse graphs, perhaps by drawing lines connecting components within the same graph.
+     *   Explore ways to visually represent the overlap or similarity between components across different documents, akin to a 3D Venn diagram showing shared concepts or related arguments.
+
+ This will provide a much richer, multi-layered view of the semantic content and argumentative structure within and between the documents.
