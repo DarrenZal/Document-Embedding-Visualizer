@@ -112,50 +112,96 @@ async function readFileContent(filepath: string, filetype: Document['filetype'])
       console.log(`[readFileContent] Parsed markdown. Length: ${parsedContent.length}`); // Added log
       return parsedContent;
     } else if (filetype === 'pdf') {
-      console.log(`[readFileContent] Processing PDF via Unstructured API: ${filepath}`); // Updated log
-      const apiKey = process.env.UNSTRUCTURED_API_KEY;
+      console.log(`[readFileContent] Processing PDF via LlamaParse API: ${filepath}`); // Updated log
+      const apiKey = process.env.LLAMAPARSE_API_KEY;
+      const LlamaParseBaseUrl = 'https://api.cloud.llamaindex.ai/api/v1'; // Assuming base URL
+
       if (!apiKey) {
-        console.error("[readFileContent] UNSTRUCTURED_API_KEY environment variable not set.");
-        throw new Error("UNSTRUCTURED_API_KEY environment variable not set.");
+        console.error("[readFileContent] LLAMAPARSE_API_KEY environment variable not set.");
+        throw new Error("LLAMAPARSE_API_KEY environment variable not set.");
       }
 
       const dataBuffer = await fs.readFile(filepath);
       console.log(`[readFileContent] PDF read into buffer. Length: ${dataBuffer.length}`);
 
       const formData = new FormData();
-      // Use the original filename for the API request
-      formData.append('files', dataBuffer, path.basename(filepath));
-      // Optional: Add strategy if needed, e.g., formData.append('strategy', 'hi_res');
+      formData.append('file', dataBuffer, path.basename(filepath)); // LlamaParse might expect 'file' field
+      // LlamaParse specific parameters if needed, e.g.:
+      // formData.append('parsing_instruction', 'Extract text content');
 
-      console.log(`[readFileContent] Sending PDF to Unstructured API...`);
+      console.log(`[readFileContent] Starting LlamaParse job for ${path.basename(filepath)}...`);
       try {
-        const response = await axios.post(
-          'https://api.unstructuredapp.io/general/v0/general', // Corrected URL
+        // 1. Start Job
+        const startJobResponse = await axios.post(
+          `${LlamaParseBaseUrl}/parsing/upload`, // Assuming endpoint
           formData,
           {
             headers: {
-              ...formData.getHeaders(), // Important for multipart/form-data
+              ...formData.getHeaders(),
+              'Authorization': `Bearer ${apiKey}`,
               'accept': 'application/json',
-              'unstructured-api-key': apiKey,
-             },
-             // Set timeout slightly less than common Vercel limits (e.g., 60s)
-             timeout: 55000 // 55 seconds
+            },
+            timeout: 30000 // Timeout for starting the job (30s)
            }
          );
 
-        console.log(`[readFileContent] Unstructured API response status: ${response.status}`);
-        // Assuming the response is an array of elements with a 'text' property
-        if (Array.isArray(response.data)) {
-          const fullText = response.data.map((element: any) => element.text).join('\n\n'); // Join elements with double newline
-          console.log(`[readFileContent] Extracted text from Unstructured API. Length: ${fullText.length}`);
-          return fullText;
-        } else {
-          console.error("[readFileContent] Unexpected response format from Unstructured API:", response.data);
-          throw new Error("Unexpected response format from Unstructured API.");
+         // Add type assertion for the response data
+         const jobId = (startJobResponse.data as { id: string }).id;
+         if (!jobId) {
+             throw new Error('LlamaParse did not return a job ID.');
         }
+        console.log(`[readFileContent] LlamaParse job started. Job ID: ${jobId}`);
+
+        // 2. Poll Job Status
+        let jobStatus = '';
+        const maxAttempts = 20; // Poll for ~5 minutes max (20 * 15s)
+        const pollInterval = 15000; // 15 seconds
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          console.log(`[readFileContent] Checking LlamaParse job status (Attempt ${attempt}/${maxAttempts})...`);
+          const statusResponse = await axios.get(
+            `${LlamaParseBaseUrl}/parsing/job/${jobId}`, // Assuming endpoint
+            {
+              headers: { 'Authorization': `Bearer ${apiKey}`, 'accept': 'application/json' },
+              timeout: 10000 // Timeout for status check (10s)
+             }
+           );
+           // Add type assertion for the response data
+           jobStatus = (statusResponse.data as { status: string }).status;
+           console.log(`[readFileContent] LlamaParse job status: ${jobStatus}`);
+
+          if (jobStatus === 'SUCCESS') break;
+          if (jobStatus === 'FAILURE') throw new Error(`LlamaParse job ${jobId} failed.`);
+
+          // Wait before polling again
+          await new Promise(resolve => setTimeout(resolve, pollInterval));
+        }
+
+        if (jobStatus !== 'SUCCESS') {
+          throw new Error(`LlamaParse job ${jobId} timed out after ${maxAttempts * pollInterval / 1000} seconds.`);
+        }
+
+        // 3. Get Job Result
+        console.log(`[readFileContent] Fetching LlamaParse result for job ${jobId}...`);
+        const resultResponse = await axios.get(
+          `${LlamaParseBaseUrl}/parsing/job/${jobId}/result/text`, // Assuming text result endpoint
+          {
+            headers: { 'Authorization': `Bearer ${apiKey}`, 'accept': 'application/json' }, // Or 'text/plain'? Check docs
+            timeout: 30000 // Timeout for getting result (30s)
+           }
+         );
+
+         // Add type assertion for the response data
+         // Assuming the result endpoint returns JSON with a 'text' field or similar
+         // Adjust based on actual LlamaParse API documentation
+         const responseData = resultResponse.data as { text?: string };
+         const fullText = responseData.text || JSON.stringify(responseData); // Fallback
+         console.log(`[readFileContent] Extracted text from LlamaParse API. Length: ${fullText.length}`);
+         return fullText;
+
       } catch (apiError: any) {
-        console.error(`[readFileContent] Error calling Unstructured API for ${filepath}:`, apiError.response?.data || apiError.message);
-        throw new Error(`Failed to process PDF via Unstructured API: ${apiError.message}`);
+        console.error(`[readFileContent] Error calling LlamaParse API for ${filepath}:`, apiError.response?.data || apiError.message);
+        throw new Error(`Failed to process PDF via LlamaParse API: ${apiError.message}`);
       }
     } else {
       console.warn(`[readFileContent] Attempted to read unsupported file type: ${filepath}`);
