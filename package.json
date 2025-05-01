@@ -6,8 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn src/main.ts",
-    "test": "jest"
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "test": "jest",
+    "vercel-build": "npm run build"
   },
   "keywords": [
     "nlp",

@@ -110,9 +110,15 @@ app.post('/upload', upload.array('documents'), async (req: Request, res: Respons
 // Export the app for testing
 export { app };
 
-// Start the server only if this file is run directly (not imported)
+// Export the app for Vercel
+module.exports = app;
+
+// Start the server only if this file is run directly (e.g., `node dist/server.js` or `ts-node src/server.ts`)
+// This allows Vercel to import the 'app' object while still enabling local execution.
 if (require.main === module) {
+  const port = process.env.PORT || 3000;
   app.listen(port, () => {
     console.log(`[server]: Server is running at http://localhost:${port}`);
+    console.log(`Access the visualizer at http://localhost:${port}/`);
   });
 }
