@@ -8,8 +8,8 @@ import { reduceDimensions, UMAPOptions } from './dimensionReducer'; // Import UM
 import { generatePlotlyData } from './visualizer';
 
 
-// Define the target directory for uploads
-const UPLOAD_DIR = path.join(__dirname, '../input_docs');
+// Define the target directory for uploads relative to project root
+const UPLOAD_DIR = path.join(process.cwd(), 'input_docs');
 
 // Ensure the upload directory exists
 fs.mkdir(UPLOAD_DIR, { recursive: true }).catch(console.error); // Create if not exists, ignore error if it does
@@ -30,19 +30,19 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 const app: Express = express();
-const port = process.env.PORT || 3000;
 
-// Serve static files (like index.html) from 'public' directory
-app.use(express.static(path.join(__dirname, '../public')));
-// Serve generated visualizations from 'output' directory
-app.use('/output', express.static(path.join(__dirname, '../output')));
-// Serve input documents from 'input_docs' directory
-app.use('/input_docs', express.static(path.join(__dirname, '../input_docs')));
+// Serve static files (like index.html) from 'public' directory relative to project root
+app.use(express.static(path.join(process.cwd(), 'public')));
+// Serve generated visualizations from 'output' directory relative to project root
+app.use('/output', express.static(path.join(process.cwd(), 'output')));
+// Serve input documents from 'input_docs' directory relative to project root
+app.use('/input_docs', express.static(path.join(process.cwd(), 'input_docs')));
 
 
 // Basic route for the root path - serve the index.html file
 app.get('/', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  // Serve index.html from the public directory relative to project root
+  res.sendFile(path.join(process.cwd(), 'public/index.html'));
 });
 
 // File upload and processing endpoint
