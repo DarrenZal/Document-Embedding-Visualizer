@@ -7,12 +7,17 @@ import { generateEmbeddings } from './embeddingGenerator';
 import { reduceDimensions, UMAPOptions } from './dimensionReducer'; // Import UMAPOptions type
 import { generatePlotlyData } from './visualizer';
 
+// Determine upload directory based on environment
+const IS_VERCEL = process.env.VERCEL === '1';
+const UPLOAD_DIR = IS_VERCEL ? path.join('/tmp', 'input_docs') : path.join(process.cwd(), 'input_docs');
+console.log(`[Server] Running on Vercel: ${IS_VERCEL}, Upload directory: ${UPLOAD_DIR}`); // Log environment
 
-// Define the target directory for uploads relative to project root
-const UPLOAD_DIR = path.join(process.cwd(), 'input_docs');
-
-// Ensure the upload directory exists
-fs.mkdir(UPLOAD_DIR, { recursive: true }).catch(console.error); // Create if not exists, ignore error if it does
+// Ensure the upload directory exists (especially needed for /tmp on Vercel)
+fs.mkdir(UPLOAD_DIR, { recursive: true }).catch(err => {
+    console.error(`[Server] Error creating upload directory ${UPLOAD_DIR}:`, err);
+    // If running on Vercel and /tmp fails, something is very wrong.
+    // Locally, permissions might be an issue.
+});
 
 // Configure multer for file uploads using disk storage
 const storage = multer.diskStorage({
@@ -57,8 +62,9 @@ app.post('/upload', upload.array('documents'), async (req: Request, res: Respons
 
     try {
         // 1. Load Documents from uploaded files
-        console.log("Step 1: Loading documents...");
-        const documents = await loadUploadedDocuments(uploadedFiles); // This now handles temp file cleanup
+        console.log(`Step 1: Loading documents from ${UPLOAD_DIR}...`);
+        // loadUploadedDocuments reads from file.path provided by multer, which uses UPLOAD_DIR
+        const documents = await loadUploadedDocuments(uploadedFiles);
         if (documents.length === 0) {
             console.log("No processable documents found in upload.");
             res.status(400).send("No processable documents (txt, md, pdf) were found in the upload.");
