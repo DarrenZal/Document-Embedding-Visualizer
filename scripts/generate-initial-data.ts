@@ -10,22 +10,47 @@ import { reduceDimensions, UMAPOptions } from '../src/dimensionReducer.js';
 import { generatePlotlyData } from '../src/visualizer.js';
 
 const PREPOP_DIR = path.join(process.cwd(), 'pre-pop');
+const SERVED_DOCS_DIR_NAME = 'served-docs'; // Directory name within public
+const SERVED_DOCS_DIR = path.join(process.cwd(), 'public', SERVED_DOCS_DIR_NAME);
 const OUTPUT_FILE = path.join(process.cwd(), 'public', 'initial-plot-data.json');
 
 async function generateInitialData() {
   console.log(`[generateInitialData] Starting pre-processing for directory: ${PREPOP_DIR}`);
+  console.log(`[generateInitialData] Will copy files to: ${SERVED_DOCS_DIR}`);
 
   try {
-    // 1. Load Documents
-    console.log(`[generateInitialData] Step 1: Loading documents...`);
-    const documents = await loadDocuments(PREPOP_DIR);
+    // --- Step 0: Prepare Served Directory ---
+    console.log("[generateInitialData] Step 0: Preparing served documents directory...");
+    await fs.mkdir(SERVED_DOCS_DIR, { recursive: true });
+    const prepopFiles = await fs.readdir(PREPOP_DIR);
+    for (const file of prepopFiles) {
+        const sourcePath = path.join(PREPOP_DIR, file);
+        const destPath = path.join(SERVED_DOCS_DIR, file);
+        console.log(`[generateInitialData] Copying ${file} to ${SERVED_DOCS_DIR_NAME}...`);
+        await fs.copyFile(sourcePath, destPath);
+    }
+    console.log("[generateInitialData] Finished copying files.");
+
+    // --- Step 1: Load Documents (from the *served* directory) ---
+    console.log(`[generateInitialData] Step 1: Loading documents from ${SERVED_DOCS_DIR}...`);
+    let documents = await loadDocuments(SERVED_DOCS_DIR); // Load from the public copy
     if (documents.length === 0) {
-      console.error("[generateInitialData] No processable documents found in pre-pop directory.");
+      console.error(`[generateInitialData] No processable documents found in ${SERVED_DOCS_DIR}.`);
       process.exit(1);
     }
     console.log(`[generateInitialData] Loaded ${documents.length} documents.`);
 
-    // 2. Generate Embeddings
+    // --- Step 1b: Adjust filepaths to be web-relative ---
+    console.log("[generateInitialData] Step 1b: Adjusting filepaths for web access...");
+     documents = documents.map(doc => ({
+         ...doc,
+         // Replace the absolute path with the relative web path (NO leading slash)
+         filepath: `${SERVED_DOCS_DIR_NAME}/${path.basename(doc.filepath)}`
+     }));
+     console.log("[generateInitialData] Adjusted filepaths:", documents.map(d => d.filepath));
+
+
+    // --- Step 2: Generate Embeddings ---
     console.log("[generateInitialData] Step 2: Generating embeddings...");
     // Ensure the cache env var is set if running this outside Vercel context
     // (dotenv should handle LLAMA key, but TRANSFORMERS_CACHE might be needed if not set globally)

@@ -35,14 +35,14 @@ export function generatePlotlyData(
         mode: 'markers',
         type: 'scatter3d',
         text: documents.map(doc => path.basename(doc.filepath)), // Use filenames for display
-        customdata: documents.map(doc => doc.filepath), // Store full filepath
-        hoverinfo: 'none', // Disable default hover text, we use hovertemplate
-        hovertemplate: `<b>%{text}</b><br>` +
-                       // Added style="color: white;" for better visibility on dark tooltips
-                       `<a href="/%{customdata}" target="_blank" style="color: white;">View File</a>` +
-                       // Add other options here in the future if needed
-                       `<extra></extra>`, // <extra> hides trace info
-        marker: {
+         customdata: documents.map(doc => doc.filepath), // Store relative filepath (e.g., served-docs/file.pdf)
+         hoverinfo: 'none', // Disable default hover text, we use hovertemplate
+         hovertemplate: `<b>%{text}</b><br>` +
+                        // Use relative link (no leading slash)
+                        `<a href="%{customdata}" target="_blank" style="color: white;">View File</a>` +
+                        // Add other options here in the future if needed
+                        `<extra></extra>`, // <extra> hides trace info
+         marker: {
             size: 5,
             // color: documents.map((_, i) => i), // Example: color by index
             // colorscale: 'Viridis',

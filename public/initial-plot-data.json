@@ -2,19 +2,19 @@
   "data": [
     {
       "x": [
-        6.552100414920233,
-        4.08095557841682,
-        -0.011793044902930205
+        9.498908522095949,
+        -7.20630409877451,
+        5.158170996619669
       ],
       "y": [
-        -1.852282376017417,
-        7.195099303146762,
-        -5.7715933634204
+        9.206896408282237,
+        8.662354708548921,
+        -2.5014733484218032
       ],
       "z": [
-        -9.310737370785432,
-        -9.945110300633417,
-        -8.201538633878513
+        -6.61145412302202,
+        1.6869290984118592,
+        -6.2782747822915175
       ],
       "mode": "markers",
       "type": "scatter3d",
@@ -24,12 +24,12 @@
         "2305.00813v1.pdf"
       ],
       "customdata": [
-        "/Users/darrenzal/ven/pre-pop/Place, Localism, Relationality, Proximity & Systems Change…..pdf",
-        "/Users/darrenzal/ven/pre-pop/Knowledge_graph.pdf",
-        "/Users/darrenzal/ven/pre-pop/2305.00813v1.pdf"
+        "served-docs/Place, Localism, Relationality, Proximity & Systems Change…..pdf",
+        "served-docs/Knowledge_graph.pdf",
+        "served-docs/2305.00813v1.pdf"
       ],
       "hoverinfo": "none",
-      "hovertemplate": "<b>%{text}</b><br><a href=\"/%{customdata}\" target=\"_blank\" style=\"color: white;\">View File</a><extra></extra>",
+      "hovertemplate": "<b>%{text}</b><br><a href=\"%{customdata}\" target=\"_blank\" style=\"color: white;\">View File</a><extra></extra>",
       "marker": {
         "size": 5
       }

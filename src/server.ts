@@ -45,11 +45,13 @@ const app: Express = express();
 app.use(express.static(path.join(process.cwd(), 'public')));
 // Serve generated visualizations from 'output' directory relative to project root
 app.use('/output', express.static(path.join(process.cwd(), 'output')));
-// Serve input documents from 'input_docs' directory relative to project root
-app.use('/input_docs', express.static(path.join(process.cwd(), 'input_docs')));
+ // Serve input documents from 'input_docs' directory relative to project root
+ app.use('/input_docs', express.static(path.join(process.cwd(), 'input_docs')));
+ // Serve pre-processed documents from 'public/served-docs' directory
+ app.use('/served-docs', express.static(path.join(process.cwd(), 'public/served-docs')));
 
 
-// Basic route for the root path - serve the index.html file
+ // Basic route for the root path - serve the index.html file
 app.get('/', (req: Request, res: Response) => {
   // Serve index.html from the public directory relative to project root
   res.sendFile(path.join(process.cwd(), 'public/index.html'));
