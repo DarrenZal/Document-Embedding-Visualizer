@@ -95,14 +95,25 @@ npm test
 
  ## Future Plans
 
- The next phase aims to enhance the visualization by incorporating extracted discourse graphs and their components:
+ The next phase aims to enhance the visualization by incorporating extracted discourse graphs and their components, using a multi-layered approach:
 
- 1.  **Discourse Graph Extraction:** Implement functionality to extract discourse graphs (representing elements like claims, evidence, premises, and their relationships) from the content of the processed PDFs and other documents. This might involve using LLMs or specialized NLP techniques.
- 2.  **Component Embedding:** Generate semantic embeddings not only for the whole documents but also for the individual nodes (e.g., claims, evidence) and potentially edges (relationships) within the extracted discourse graphs.
- 3.  **Multi-Layered Visualization:** Update the dimensionality reduction (UMAP) and Plotly visualization to represent multiple layers of information in the same 3D space:
-     *   Display points for whole documents.
-     *   Display points for discourse graph components, potentially using different markers, sizes, or colors based on component type (claim, evidence, etc.).
-     *   Visualize the structure of the discourse graphs, perhaps by drawing lines connecting components within the same graph.
-     *   Explore ways to visually represent the overlap or similarity between components across different documents, akin to a 3D Venn diagram showing shared concepts or related arguments.
+ 1.  **Discourse Graph Extraction:** Implement functionality to extract discourse graphs (representing elements like claims, evidence, premises, questions, and their relationships) from the content of the processed PDFs and other documents. This might involve using LLMs or specialized NLP techniques.
+ 2.  **Component Embedding:** Generate semantic embeddings not only for the whole documents but also for the individual nodes (e.g., claims, evidence, questions) and potentially edges (relationships) within the extracted discourse graphs.
+ 3.  **Unified Visualization Space:** Utilize a single UMAP-reduced 3D space to plot both the whole-document text embeddings and the graph node embeddings. This allows for direct comparison and analysis of how specific structural elements relate to the overall semantic position of the documents.
+ 4.  **Visual Encoding Strategy:**
+     *   **Color:** Use color to consistently represent the source document. All elements (the document point itself and all its extracted graph nodes) from the same document will share the same color (e.g., Document A = blue, Document B = orange).
+     *   **Shape:** Use different shapes to distinguish between element types:
+         *   ● Whole Document Embedding
+         *   ■ Claim Node
+         *   ▲ Question Node
+         *   ◆ Evidence Node
+         *   (Other shapes for other node types as needed)
+     *   **Size:** Optionally, node size could represent centrality or importance within its discourse graph.
+ 5.  **Interactivity:**
+     *   **Hover Effects:** Display details about the node (type, text snippet) and potentially highlight its connections within the graph or its parent document.
+     *   **Click Highlighting:** Clicking on any element could highlight all other elements belonging to the same source document.
+     *   **Filtering:** Add controls to toggle the visibility of different element types (e.g., show only claims and documents).
+     *   **Connection Lines:** Optionally draw faint lines connecting graph nodes belonging to the same document or representing direct relationships in the discourse graph.
+ 6.  **Layout:** Aim to visually cluster graph elements around their parent document's embedding point to maintain context.
 
- This will provide a much richer, multi-layered view of the semantic content and argumentative structure within and between the documents.
+ This approach will provide a much richer, multi-layered view, enabling analysis of semantic similarity at the document level alongside the structural and semantic relationships of discourse components within and between documents.
