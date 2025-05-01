@@ -1,11 +1,9 @@
-import { pipeline, env, Pipeline } from '@xenova/transformers';
+// Remove static imports for transformers
+// import { pipeline, env, Pipeline } from '@xenova/transformers';
 import { Document } from './documentLoader'; // Import the Document type
 
-// Configure Transformers.js environment
-env.allowLocalModels = true;
-env.useBrowserCache = false; // Disable browser cache for Node.js environment
-
 // Define the expected function signature for the feature extraction pipeline
+// Note: We might not need the Pipeline type directly anymore if only using dynamic import
 // It takes text or array of text, options, and returns embeddings
 type FeatureExtractionPipeline = (
     texts: string | string[],
@@ -20,6 +18,14 @@ let extractor: FeatureExtractionPipeline | null = null;
 async function getExtractor(): Promise<FeatureExtractionPipeline> {
     if (extractor === null) {
         console.log('Initializing feature extraction pipeline...');
+        // Dynamically import the transformers library
+        const { pipeline, env } = await import('@xenova/transformers');
+
+        // Configure Transformers.js environment inside the async function
+        // to ensure it runs after the import
+        env.allowLocalModels = true;
+        env.useBrowserCache = false; // Disable browser cache for Node.js environment
+
         // Load the model for sentence embeddings
         // Use Xenova/all-MiniLM-L6-v2 for good performance/quality balance
         extractor = (await pipeline(
