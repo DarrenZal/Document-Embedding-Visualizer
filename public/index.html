@@ -43,13 +43,12 @@
                 formData.append('documents', file);
             }
 
-            // Determine API endpoint based on environment
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const uploadUrl = isLocal ? '/upload' : '/api/upload';
-            console.log(`Using upload URL: ${uploadUrl}`); // Add log for debugging
+            // Always use /api/upload now that server expects it in both environments
+            const uploadUrl = '/api/upload';
+            console.log(`Using upload URL: ${uploadUrl}`);
 
             try {
-                const response = await fetch(uploadUrl, { // Use dynamic URL
+                const response = await fetch(uploadUrl, {
                     method: 'POST',
                     body: formData,
                     // 'Content-Type': 'multipart/form-data' is set automatically by browser for FormData

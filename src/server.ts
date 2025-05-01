@@ -50,10 +50,11 @@ app.get('/', (req: Request, res: Response) => {
   res.sendFile(path.join(process.cwd(), 'public/index.html'));
 });
 
-// File upload and processing endpoint
-app.post('/upload', upload.array('documents'), async (req: Request, res: Response) => {
+// File upload and processing endpoint - **Match the Vercel route /api/upload**
+app.post('/api/upload', upload.array('documents'), async (req: Request, res: Response) => {
+    console.log(`[Server] Reached POST /api/upload handler. Request path: ${req.path}`); // Add log
     const uploadedFiles = req.files as Express.Multer.File[];
-    console.log('Received upload request with files:', uploadedFiles?.map(f => f.originalname));
+    console.log('[Server] Received upload request with files:', uploadedFiles?.map(f => f.originalname));
 
     if (!uploadedFiles || uploadedFiles.length === 0) {
         res.status(400).send('No files were uploaded.');
