@@ -1,7 +1,7 @@
  import Plotly from 'plotly.js'; // Import from the main module to match @types/plotly.js
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Document } from './documentLoader'; // Import Document type
+import { Document } from './documentLoader.js'; // Add .js extension
 
 // Define the structure for the Plotly data object to be returned
 export interface PlotlyData {
